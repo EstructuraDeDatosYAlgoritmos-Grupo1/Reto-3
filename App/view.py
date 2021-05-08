@@ -164,7 +164,13 @@ while True:
         initialTime = input("Ingrese la hora minima (H:M): ")
         finalTime = input("Ingrese la hora maxima (H:M): ")
         total = controller.getTimeByRange(catalog,initialTime,finalTime)
-        print('El genero mas escuchado entre las ' + str(initialTime) + ' y las ' + str(finalTime) + ' es ' + str(total[0]) + ' con ' + str(total[1])+' avg '+str(total[2]) )
+        print('El genero mas escuchado entre las ' + str(initialTime) + ' y las ' + str(finalTime) + ' es ' + str(total[0]) + ' con ' + str(total[1])+ ' reproducciones')
+        print('\n Diez de sus tracks son: \n')
+        counter = 0
+        while counter < 10:
+            print('ID: ' + str(lt.getElement(total[3],counter)) + ' con VADER promedio de: ' + str(lt.getElement(total[2],counter)))
+            counter = counter + 1
+    
 
     else:
         sys.exit(0)

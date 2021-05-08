@@ -352,24 +352,30 @@ def getGenreByTimeRange(catalog, initialTi, finalTi):
             lstGenre = genre['avg']
 
     counter = 0 
+    lst2 = lt.newList(datastructure = 'SINGLE_LINKED')
+    lst3 = lt.newList(datastructure = 'SINGLE_LINKED')
 
-    while counter < 10:
+    while lt.size(lst2) < 10:
         avg = 0
+        # Se le pide el valor de la posicion counter en la lista de tracks del genero mas escuchado a la lista general
         value = lt.getElement(catalog['reps'],lt.getElement(lstGenre, counter))
+        # Se le pide la primera parte de la tupla que es la que contiene la informacion util
         value1 = value[0]
+        # Se le pide los valores de sentimiento asociados al hastag del elemento counter
         feel = mp.get(catalog['feelings'],value[1])
+        # Si la entrada de feel no es vacia (es decir, si el hashtag si está en la lista de feelings), se le pide el valor de 
         if feel != None:
            feel = me.getValue(feel)
-           for element in feel:
-              if element['vader_avg'] != '':
-                  avg = float(element['vader_avg'])
-                  break
-
-        print(str(value1['track_id']) + str(value[0]) + str(avg) )
+           # el valor da una lista de todos los valores con el hashtag que se le dio entonces se usa el primero
+           feel1 = lt.getElement(feel, 0)
+           if feel1['vader_avg'] != '':
+               # Si el vader_avg no está vacio se saca el valor y se añade a la lista lst2
+                avg = float(feel1['vader_avg'])
+                lt.addLast(lst2, avg)
+                lt.addLast(lst3, value1['track_id'])
         counter = counter + 1
-
-
-    return maxName,  maxReps, lstGenre
+                
+    return maxName,  maxReps, lst2, lst3
 
 # Funciones utilizadas para comparar elementos dentro de una lista
 
