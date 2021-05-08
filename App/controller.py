@@ -51,20 +51,19 @@ def loadEvents(catalog):
     eventsDict1 = csv.DictReader(open(eventsfile1, encoding='utf-8'))
     eventsfile2 = cf.data_dir + "subsamples-small/user_track_hashtag_timestamp-small.csv"
     eventsDict2 = csv.DictReader(open(eventsfile2, encoding='utf-8'))
-    eventsfile3 = cf.data_dir + "subsamples-small/sentiment_values.csv"
-    eventsDict3 = csv.DictReader(open(eventsfile3, encoding='utf-8'))
-
-    for feeling in eventsDict3:
-        model.addFeelings(catalog, feeling)
     for rep2 in eventsDict2:
         model.addRep2(catalog, rep2)
     for rep in eventsDict1:
         position = model.getPosition(catalog)
         model.addReps(catalog, rep, position)
-        
+
 
 
 # Funciones de ordenamiento
+
+def joinLists(lst1, lst2):
+    answers = model.joinLists(lst1, lst2)
+    return answers
 
 # Funciones de consulta sobre el catálogo
 def getChar(charList, charPos):
@@ -84,21 +83,13 @@ def indexHeight(catalogIndex):
 def numArtists(catalog):
     return model.numArtists(catalog)
 
-# Primer requerimiento
-
-def getCharByRange(catalog,bestChar, minchar, maxchar):
+def getCharByRange(catalog, bestChar, minchar, maxchar):
     answers = model.getCharByRange(catalog, bestChar, minchar, maxchar)
     return answers
 
-# Segundo requerimiento
-
-def req2(catalog, minCharE, maxCharE, minCharD, maxCharD):
-    result = model.req2(catalog, minCharE, maxCharE, minCharD, maxCharD)
-    return result
+def pickRandomTracks(catalog, lst):
+    randomTracks = model.pickRandomTracks(catalog, lst)
+    return randomTracks
 
 
-def req5(catalog, initialTime, finalTime):
-    initialTi = datetime.datetime.strptime(initialTime, '%H:%M:%S')
-    finalTi = datetime.datetime.strptime(finalTime, '%H:%M:%S')
-    result = model.req51(catalog, initialTi, finalTi)
-    return result
+
