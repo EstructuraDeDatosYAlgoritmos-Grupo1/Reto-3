@@ -116,7 +116,15 @@ while True:
                 print('Altura del arbol: ' + str(controller.indexHeight(catalog[bestChar])))
 
     elif int(inputs[0]) == 3:
-        pass
+        minEnergy = float(input("Ingrese el valor minimo de energia (Entre 1.0 y -1.0): "))
+        maxEnergy = float(input("Ingrese el valor maximo de energia (Entre 1.0 y -1.0): "))
+        minDanceability = float(input("Ingrese el valor minimo de bailabilidad (Entre 1.0 y -1.0): "))
+        maxDanceability = float(input("Ingrese el valor maximo de bailabilidad (Entre 1.0 y -1.0): "))
+        enregyList = controller.getCharByRange(catalog, "energy", minEnergy, maxEnergy)
+        danceabilityList = controller.getCharByRange(catalog, "danceability", minDanceability, maxDanceability)
+        answers = controller.joinLists(enregyList[1], danceabilityList[1])
+        print("Hay un total de " + str(answers[0]) + " repeticiones entre el rango de bailabilidad " + str(minDanceability) + " - " + str(maxDanceability) + " y para el rango de energia "+str(minEnergy)+" - "+str(maxEnergy))
+        printRandomTracks(catalog, answers[1])
 
     elif int(inputs[0]) == 4:
         minInstrumentalness = float(input("Ingrese el valor minimo de instrumentalidad (Entre 1.0 y -1.0): "))
