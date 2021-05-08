@@ -114,10 +114,9 @@ def addReps(catalog, rep, position):
         updateChar(catalog,"energy",rep, position)
         updateTimes(catalog,"time", rep, position)
 
-    
 
-def addEntry(dataentry, rep):
-    lt.addLast(dataentry,rep)
+def addEntry(dataentry, position):
+    lt.addLast(dataentry, position)
     return dataentry
 
 def newDataEntry():
