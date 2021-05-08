@@ -55,7 +55,9 @@ def newCatalog():
                 "acousticness":None,
                 "energy":None,
                 "artists":None,
-                "userMap":None}
+                "userMap":None,
+                "time":None,
+                "feeling":None}
 
     catalog["reps"] = lt.newList(datastructure="ARRAY_LIST")
     catalog["instrumentalness"]= om.newMap(omaptype='RBT', comparefunction=cmpCharacteristics)
@@ -67,10 +69,12 @@ def newCatalog():
     catalog["tempo"] = om.newMap(omaptype='RBT', comparefunction=cmpCharacteristics)
     catalog["acousticness"] = om.newMap(omaptype='RBT', comparefunction=cmpCharacteristics)
     catalog["energy"] = om.newMap(omaptype='RBT', comparefunction=cmpCharacteristics)
+    catalog['time'] = om.newMap(omaptype='RBT',comparefunction = compareTimes)
+
 
     catalog["artists"] = mp.newMap(numelements=40000, prime=20011, maptype="CHAINING", loadfactor = 2.0, comparefunction=cmpArtistId)
     catalog["userMap"] = mp.newMap(numelements=40000, prime=20011, maptype="CHAINING", loadfactor = 2.0, comparefunction=cmpUserId)
-
+    catalog["feelings"] = mp.newMap(numelements=40000, prime=20011, maptype="CHAINING", loadfactor = 2.0)
 
     return catalog
 
@@ -108,6 +112,7 @@ def addReps(catalog, rep, position):
         updateChar(catalog,"tempo",rep, position)
         updateChar(catalog,"acousticness",rep, position)
         updateChar(catalog,"energy",rep, position)
+        updateTimes(catalog,"time", rep, position)
 
     
 
@@ -137,6 +142,16 @@ def addArtist(catalog, rep, position):
         dataentry = me.getValue(existsArtist)
     addEntry(dataentry,position)
 
+def addFeeling(catalog, rep):
+    existsEntry = mp.get(catalog["feelings"], rep["hashtag"])
+    if existsEntry == None:
+        dataentry = lt.newList("SINGLE_LINKED")
+        mp.put(catalog["feelings"],rep["hashtag"],dataentry)
+    else:
+        dataentry = me.getValue(existsEntry)
+    lt.addLast(dataentry, rep)
+
+
 # Funciones para la carga de las caracteristicas
 
 def updateChar(catalog, char, rep, position):
@@ -148,6 +163,18 @@ def updateChar(catalog, char, rep, position):
     else:
         dataentry = me.getValue(entry)
     addEntry(dataentry, position)
+
+
+def updateTimes(catalog, char,  rep, position):
+    repOccuredOn = rep['created_at']
+    repDate = datetime.datetime.strptime(repOccuredOn, '%Y-%m-%d %H:%M:%S')
+    entry = om.get(catalog['time'],repDate.time())
+    if (entry is None):
+        dataentry = lt.newList("SINGLE_LINKED")
+        om.put(catalog['time'], repDate.time(), dataentry)
+    else:
+        dataentry = me.getValue(entry)
+    lt.addLast(dataentry,position)
     
 
 #---------------------------------
@@ -182,6 +209,31 @@ def newGenreList():
     RnB = (60.0,80.0,"R&B")
     rock = (110.0,140.0,"Rock")
     metal = (100.0,160.0,"Metal")
+
+    lt.addLast(genreList, reggae )
+    lt.addLast(genreList, downTempo)
+    lt.addLast(genreList, chillOut)
+    lt.addLast(genreList, hipHop)
+    lt.addLast(genreList, JazzAndFunk)
+    lt.addLast(genreList, pop)
+    lt.addLast(genreList, RnB)
+    lt.addLast(genreList, rock)
+    lt.addLast(genreList, metal)
+    return genreList
+
+def newGenreList1():
+    genreList = lt.newList(datastructure="ARRAY_LIST")
+    reggae = {'mini': 60.0, 'maxi': 90.0, 'name': "Reggae", 'reps': 0, 'avg': lt.newList(datastructure='SINGLE_LINKED')}
+    downTempo = {'mini':70.0, 'maxi':100.0,'name':"Down-Tempo",'reps': 0, 'avg': lt.newList(datastructure='SINGLE_LINKED')}
+    chillOut = {'mini':90.0, 'maxi':120.0,'name':"Chill-out",'reps': 0, 'avg': lt.newList(datastructure='SINGLE_LINKED')}
+
+    hipHop = {'mini':85.0, 'maxi':115.0,'name':"Hip-hop",'reps': 0, 'avg': lt.newList(datastructure='SINGLE_LINKED')}
+    JazzAndFunk = {'mini':120.0, 'maxi':125.0,'name':"Jazz and Funk",'reps': 0, 'avg': lt.newList(datastructure='SINGLE_LINKED')}
+    pop = {'mini':100.0, 'maxi':130.0,'name':"Pop",'reps': 0, 'avg': lt.newList(datastructure='SINGLE_LINKED')}
+
+    RnB = {'mini':60.0, 'maxi':80.0,'name':"R&B",'reps': 0, 'avg': lt.newList(datastructure='SINGLE_LINKED')}
+    rock = {'mini':110.0, 'maxi':140.0,'name':"Rock",'reps': 0, 'avg': lt.newList(datastructure='SINGLE_LINKED')}
+    metal = {'mini':100.0, 'maxi':160.0,'name':"Metal",'reps': 0, 'avg': lt.newList(datastructure='SINGLE_LINKED')}
 
     lt.addLast(genreList, reggae )
     lt.addLast(genreList, downTempo)
@@ -273,6 +325,53 @@ def pickRandomTracks(catalog, lst):
 
 # Quinto Requerimiento
 
+def getGenreByTimeRange(catalog, initialTi, finalTi):
+    lst = om.values(catalog['time'], initialTi, finalTi)
+    lst1 = lt.newList(datastructure = 'SINGLE_LINKED')
+    genreList = newGenreList1()
+    for lstrep in lt.iterator(lst):
+        for lstrep1 in lt.iterator(lstrep):
+            #Entiendo que tengo que pedirle el valor a la lista
+            lstrep2 = lt.getElement(catalog["reps"], lstrep1)
+            #Entiendo que como es una tupla tengo que pedirle el primer valor
+            lstrep3 = lstrep2[0]
+            #Entiendo que a ese valor le puedo pedir el tempo
+            tempo = lstrep3['tempo']
+            for genre in lt.iterator(genreList):
+                if (float(tempo) >= float(genre['mini']) and float(tempo) <= float(genre['maxi'])):
+                    genre['reps'] =  genre['reps'] + 1
+                    lt.addLast(genre['avg'],lstrep1)
+
+    maxReps = 0
+    maxName = None
+    lstGenre = None
+            
+    for genre in lt.iterator(genreList):
+        if genre['reps'] > maxReps:
+            maxReps = genre['reps']
+            maxName = genre['name']
+            lstGenre = genre['avg']
+
+    counter = 0 
+
+    while counter < 10:
+        avg = 0
+        value = lt.getElement(catalog['reps'],lt.getElement(lstGenre, counter))
+        value1 = value[0]
+        feel = mp.get(catalog['feelings'],value[1])
+        if feel != None:
+           feel = me.getValue(feel)
+           for element in feel:
+              if element['vader_avg'] != '':
+                  avg = float(element['vader_avg'])
+                  break
+
+        print(str(value1['track_id']) + str(value[0]) + str(avg) )
+        counter = counter + 1
+
+
+    return maxName,  maxReps, lstGenre
+
 # Funciones utilizadas para comparar elementos dentro de una lista
 
 def cmpCharacteristics(char1, char2):
@@ -316,4 +415,13 @@ def cmpTempoRange(range1, range2):
         return 1
     else:
         return -1
+
+def compareTimes(time1, time2):
+    if (time1 == time2):
+        return 0
+    elif (time1 > time2):
+        return 1
+    else:
+        return -1
+
 # Funciones de ordenamiento

@@ -57,6 +57,12 @@ def loadEvents(catalog):
         position = model.getPosition(catalog)
         model.addReps(catalog, rep, position)
 
+    eventsfile3 = cf.data_dir + "subsamples-small/sentiment_values.csv"
+    eventsDict3 = csv.DictReader(open(eventsfile3, encoding='utf-8'))
+    for rep in eventsDict3:
+        model.addFeeling(catalog, rep)
+    
+
 
 
 # Funciones de ordenamiento
@@ -90,6 +96,14 @@ def getCharByRange(catalog, bestChar, minchar, maxchar):
 def pickRandomTracks(catalog, lst):
     randomTracks = model.pickRandomTracks(catalog, lst)
     return randomTracks
+
+def getTimeByRange(catalog,initialTime,finalTime):
+    initialTi = datetime.datetime.strptime(initialTime, '%H:%M')
+    initialTi = initialTi.time()
+    finalTi = datetime.datetime.strptime(finalTime, '%H:%M')
+    finalTi = finalTi.time()
+    result = model.getGenreByTimeRange(catalog, initialTi, finalTi)
+    return result
 
 
 

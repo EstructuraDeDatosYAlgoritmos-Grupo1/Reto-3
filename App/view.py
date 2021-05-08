@@ -58,8 +58,6 @@ def printCharacteristics():
     print("9. Energy")
 
 
-
-
 def printGenres():
     print("1. Reggae")
     print("2. Down-Tempo")
@@ -155,7 +153,10 @@ while True:
                 print("\nEl numero de reproducciones para este genero fueron: "+str(total[0]))
     
     elif int(inputs[0]) == 6:
-        pass
+        initialTime = input("Ingrese la hora minima (H:M): ")
+        finalTime = input("Ingrese la hora maxima (H:M): ")
+        total = controller.getTimeByRange(catalog,initialTime,finalTime)
+        print('El genero mas escuchado entre las ' + str(initialTime) + ' y las ' + str(finalTime) + ' es ' + str(total[0]) + ' con ' + str(total[1]) +' reproducciones y un vader promedio de '+ str(total[2]))
         
 
     else:
