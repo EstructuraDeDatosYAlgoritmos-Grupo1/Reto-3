@@ -53,6 +53,7 @@ def loadEvents(catalog):
     eventsDict2 = csv.DictReader(open(eventsfile2, encoding='utf-8'))
     for rep2 in eventsDict2:
         model.addRep2(catalog, rep2)
+        model.addTrack(catalog, rep2)
     for rep in eventsDict1:
         position = model.getPosition(catalog)
         model.addReps(catalog, rep, position)

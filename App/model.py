@@ -75,12 +75,22 @@ def newCatalog():
     catalog["artists"] = mp.newMap(numelements=40000, prime=20011, maptype="CHAINING", loadfactor = 2.0, comparefunction=cmpArtistId)
     catalog["userMap"] = mp.newMap(numelements=40000, prime=20011, maptype="CHAINING", loadfactor = 2.0, comparefunction=cmpUserId)
     catalog["feelings"] = mp.newMap(numelements=40000, prime=20011, maptype="CHAINING", loadfactor = 2.0)
+    catalog["track"] = mp.newMap(numelements=40000, prime=20011, maptype="CHAINING", loadfactor = 2.0)
 
     return catalog
 
 #------------------------------------------------
 # Funciones para agregar informacion al catalogo
 #------------------------------------------------
+
+def addTrack(catalog,rep):
+    existsEntry = mp.get(catalog["track"], rep["track_id"])
+    if existsEntry == None:
+        dataentry = lt.newList("SINGLE_LINKED")
+        mp.put(catalog["track"],rep["track_id"],dataentry)
+    else:
+        dataentry = me.getValue(existsEntry)
+    lt.addLast(dataentry, rep['hashtag'])
 
 def addRep2(catalog, rep2):
     addToUserMap(catalog,rep2)
@@ -354,28 +364,46 @@ def getGenreByTimeRange(catalog, initialTi, finalTi):
     counter = 0 
     lst2 = lt.newList(datastructure = 'SINGLE_LINKED')
     lst3 = lt.newList(datastructure = 'SINGLE_LINKED')
+    lst4 = lt.newList(datastructure = 'SINGLE_LINKED')
 
-    while lt.size(lst2) < 10:
-        avg = 0
+    while counter < lt.size(lstGenre):
+        avg1 = 0
         # Se le pide el valor de la posicion counter en la lista de tracks del genero mas escuchado a la lista general
         value = lt.getElement(catalog['reps'],lt.getElement(lstGenre, counter))
         # Se le pide la primera parte de la tupla que es la que contiene la informacion util
         value1 = value[0]
-        # Se le pide los valores de sentimiento asociados al hastag del elemento counter
-        feel = mp.get(catalog['feelings'],value[1])
-        # Si la entrada de feel no es vacia (es decir, si el hashtag si está en la lista de feelings), se le pide el valor de 
-        if feel != None:
-           feel = me.getValue(feel)
-           # el valor da una lista de todos los valores con el hashtag que se le dio entonces se usa el primero
-           feel1 = lt.getElement(feel, 0)
-           if feel1['vader_avg'] != '':
-               # Si el vader_avg no está vacio se saca el valor y se añade a la lista lst2
-                avg = float(feel1['vader_avg'])
-                lt.addLast(lst2, avg)
-                lt.addLast(lst3, value1['track_id'])
+        value2 = value1['track_id']
+        # Se le piden los hashtags asociados al track_id de la entrada
+        hashtags = mp.get(catalog['track'],value2)
+        hashtags = me.getValue(hashtags)
+        # Se crea una lista que va a contener los vander avg de cada uno de los hashtags
+        lst5 = lt.newList(datastructure = 'SINGLE_LINKED')
+        # Si la cantidad de hashtags es diferente de cero, para cada hashtag se pide la entrada en la lista de sentimientos
+        if lt.size(hashtags) != 0:
+            for element in lt.iterator(hashtags):
+                  feel = mp.get(catalog['feelings'], element)
+                  # Si existe una entrada asociada al hashtag en la lista de sentimientos, se pide el valor
+                  if feel != None:
+                      feel1 = me.getValue(feel)
+                      # Como puede existir mas de una entrada asociada a un hashtag en la lista de sentimientos (y por lo tanto varios valores vader_avg), se usa el primero
+                      feel1 = lt.getElement(feel1, 0)
+                      # Si el vader_avg no está vacio se saca el valor, se añade a la lista lst5 y se suma a avg 1
+                      if feel1['vader_avg'] != '':
+                           avg = float(feel1['vader_avg'])
+                           lt.addLast(lst5, avg)
+                           avg1 = avg1 + avg
+                 
+        #La lista de valores de avg para esta entrada (hashtags validos) se añade a la lista 2, solo se añade si es diferente a cero porque se necesita sacar el promedio (y no se puede dividir en cero)
+        if lt.isEmpty(lst5) == 0:
+           lt.addLast(lst2, lst5)     
+        #El id de esta entrada se añade a la lst3
+        lt.addLast(lst3, value2)
+        #La suma de los average se añade a la lst4 
+        lt.addLast(lst4, avg1)
+
         counter = counter + 1
                 
-    return maxName,  maxReps, lst2, lst3
+    return maxName,  maxReps, lst2, lst3, lst4
 
 # Funciones utilizadas para comparar elementos dentro de una lista
 
@@ -429,4 +457,11 @@ def compareTimes(time1, time2):
     else:
         return -1
 
+def compareListsSize(list1, list2):
+    if (lt.size(list1) == lt.size(list2)):
+        return 0
+    elif (lt.size(list1) > lt.size(list2)):
+        return 1
+    else:
+        return -1
 # Funciones de ordenamiento

@@ -168,7 +168,7 @@ while True:
         print('\n Diez de sus tracks son: \n')
         counter = 0
         while counter < 10:
-            print('ID: ' + str(lt.getElement(total[3],counter)) + ' con VADER promedio de: ' + str(lt.getElement(total[2],counter)))
+            print('ID: ' + str(lt.getElement(total[3],counter)) + ' Hashtags : ' + str(lt.size(lt.getElement(total[2],counter))) + ' vader promedio de: ' +  str(lt.getElement(total[4],counter)/lt.size(lt.getElement(total[2],counter))))
             counter = counter + 1
     
 
