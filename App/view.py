@@ -125,6 +125,8 @@ while True:
         answers = controller.joinLists(enregyList[1], danceabilityList[1])
         print("Hay un total de " + str(answers[0]) + " repeticiones entre el rango de bailabilidad " + str(minDanceability) + " - " + str(maxDanceability) + " y para el rango de energia "+str(minEnergy)+" - "+str(maxEnergy))
         printRandomTracks(catalog, answers[1])
+        artists = controller.getArtistsInList(catalog, answers[1])
+        print("El numero de artistas unicos fue: "+ str(artists[0]))
 
     elif int(inputs[0]) == 4:
         minInstrumentalness = float(input("Ingrese el valor minimo de instrumentalidad (Entre 1.0 y -1.0): "))
@@ -136,6 +138,8 @@ while True:
         answers = controller.joinLists(instrumentalList[1], tempoList[1])
         print("Hay un total de " + str(answers[0]) + " repeticiones entre el rango de instrumentalidad " + str(minInstrumentalness) + " - " + str(maxInstrumentalness) + " y para el rango de tempo "+str(minTempo)+" - "+str(maxTempo))
         printRandomTracks(catalog, answers[1])
+        artists = controller.getArtistsInList(catalog, answers[1])
+        print("El numero de artistas unicos fue: "+ str(artists[0]))
 
     elif int(inputs[0]) ==5:
         printGenres()
