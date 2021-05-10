@@ -286,7 +286,7 @@ def getArtistsInList(catalog, posList):
     tempArtists = om.newMap(omaptype= "BST", comparefunction= cmpArtistId)
     for pos in posList:
         rep = lt.getElement(catalog["reps"], pos)
-        existsArtist = om.contains(rempArtists, rep["artist_id"])
+        existsArtist = om.contains(tempArtists, rep["artist_id"])
         if existsArtist == False:
             om.put(tempArtists, rep["artist_id"], 0)
     artistList = om.keySet(tempArtists)
