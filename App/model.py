@@ -389,7 +389,6 @@ def getMostlistenedGenre(catalog, lst):
             tempo = lstrep3['tempo']
             for genre in lt.iterator(genreList):
                 if (float(tempo) >= float(genre['mini']) and float(tempo) <= float(genre['maxi'])):
-                    if lt.isPresent(genre['avg'], lstrep3['track_id']) == 0:
                         genre['reps'] =  genre['reps'] + 1
                         lt.addLast(genre['avg'],lstrep3['track_id'])
             
@@ -413,6 +412,7 @@ def getHashtags(catalog, lstGenre):
 
         
         listOfHashtags = me.getValue(mp.get(catalog['track'],track))
+        listOfHashtags = eliminateRepeated(listOfHashtags)
         numHashtags = lt.size(listOfHashtags)
         for hashtag in lt.iterator(listOfHashtags):
             feelRep = mp.get(catalog['feelings'], hashtag)
@@ -433,9 +433,19 @@ def getHashtags(catalog, lstGenre):
         catalogForElement['numHashtags'] = numHashtags
 
         lt.addLast(lstOfElements, catalogForElement)
-    
-    return lstOfElements
 
+    newList = merge.sort(lstOfElements, cmpVideosByHash)
+    
+    return newList
+
+
+def eliminateRepeated(lst):
+    auxLst = lt.newList(datastructure = 'SINGLE_LINKED')
+    for element in lt.iterator(lst):
+        if lt.isPresent(auxLst, element) == 0:
+            lt.addLast(auxLst, element)
+
+    return auxLst
 
 
 
@@ -520,3 +530,11 @@ def cmpPosition1(posi1,posi2):
         return 1
     else:
         return -1
+
+def cmpVideosByHash(vide1, vide2):
+    video1 = vide1['numHashtags']
+    video2 = vide2['numHashtags'] 
+    if float(video1) < float(video2):
+        return False
+    else:
+        return True
