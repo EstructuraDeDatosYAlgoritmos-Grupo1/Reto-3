@@ -281,6 +281,19 @@ def getPosition(catalog):
 def numArtists(catalog):
     artistList = mp.keySet(catalog["artists"])
     return lt.size(artistList)
+
+def getArtistsInList(catalog, posList):
+    tempArtists = om.newMap(omaptype= "BST", comparefunction= cmpArtistId)
+    for pos in posList:
+        rep = lt.getElement(catalog["reps"], pos)
+        existsArtist = om.contains(rempArtists, rep["artist_id"])
+        if existsArtist == False:
+            om.put(tempArtists, rep["artist_id"], 0)
+    artistList = om.keySet(tempArtists)
+    numArtists = lt.size(artistList)
+    return (numArtists, artistList)
+            
+
 #--------------------------------------------------------------------------------------------
 
 # Primer Requerimiento
