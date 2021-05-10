@@ -188,8 +188,10 @@ while True:
         print('\n Diez de sus tracks son: \n')
         counter = 0
         while counter < 10:
-            print('ID: ' + str(lt.getElement(total[3],counter)) + ' Hashtags : ' + str(lt.getElement(total[2],counter)) + ' vader promedio de: ' +  str(lt.getElement(total[4],counter)/lt.getElement(total[2],counter)))
+            element = lt.getElement(total[2],counter)
+            print('ID: ' + str(element['id']) + ' Hashtags : ' + str(element['numHashtags']) + ' vader promedio de: ' +  str(element['avg']) )
             counter = counter + 1
+      
        
     
 

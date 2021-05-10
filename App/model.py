@@ -90,7 +90,8 @@ def addTrack(catalog,rep):
         mp.put(catalog["track"],rep["track_id"],dataentry)
     else:
         dataentry = me.getValue(existsEntry)
-    lt.addLast(dataentry, rep['hashtag'])
+    if lt.isPresent(dataentry,rep['hashtag']) == 0 :
+       lt.addLast(dataentry, rep['hashtag'])
 
 def addRep2(catalog, rep2):
     addToUserMap(catalog,rep2)
@@ -154,12 +155,11 @@ def addArtist(catalog, rep, position):
 def addFeeling(catalog, rep):
     existsEntry = mp.get(catalog["feelings"], rep["hashtag"])
     if existsEntry == None:
-        dataentry = lt.newList("SINGLE_LINKED")
+        dataentry = None
         mp.put(catalog["feelings"],rep["hashtag"],dataentry)
     else:
         dataentry = me.getValue(existsEntry)
-    lt.addLast(dataentry, rep)
-
+    mp.put(catalog["feelings"],rep["hashtag"],rep)
 
 # Funciones para la carga de las caracteristicas
 
@@ -358,8 +358,26 @@ def getArtists(catalog, minChar, maxChar, char):
 # Quinto Requerimiento
 
 def getGenreByTimeRange(catalog, initialTi, finalTi):
+
     lst = om.values(catalog['time'], initialTi, finalTi)
-    lst1 = lt.newList(datastructure = 'SINGLE_LINKED')
+
+    mostGenre = getMostlistenedGenre(catalog, lst)
+    lstGenres = getHashtags(catalog, mostGenre[2])
+
+    maxReps = mostGenre[0]
+    maxName = mostGenre[1]
+
+
+    return maxName,  maxReps, lstGenres
+
+
+
+def getMostlistenedGenre(catalog, lst):
+    
+    maxReps = 0
+    maxName = None
+    lstGenre = None
+
     genreList = newGenreList1()
     for lstrep in lt.iterator(lst):
         for lstrep1 in lt.iterator(lstrep):
@@ -371,12 +389,8 @@ def getGenreByTimeRange(catalog, initialTi, finalTi):
             tempo = lstrep3['tempo']
             for genre in lt.iterator(genreList):
                 if (float(tempo) >= float(genre['mini']) and float(tempo) <= float(genre['maxi'])):
-                    genre['reps'] =  genre['reps'] + 1
-                    lt.addLast(genre['avg'],lstrep1)
-
-    maxReps = 0
-    maxName = None
-    lstGenre = None
+                        genre['reps'] =  genre['reps'] + 1
+                        lt.addLast(genre['avg'],lstrep2)
             
     for genre in lt.iterator(genreList):
         if genre['reps'] > maxReps:
@@ -384,49 +398,80 @@ def getGenreByTimeRange(catalog, initialTi, finalTi):
             maxName = genre['name']
             lstGenre = genre['avg']
 
-    counter = 0 
-    lst2 = lt.newList(datastructure = 'SINGLE_LINKED')
-    lst3 = lt.newList(datastructure = 'SINGLE_LINKED')
-    lst4 = lt.newList(datastructure = 'SINGLE_LINKED')
+    return maxReps, maxName, lstGenre
 
-    while counter < lt.size(lstGenre):
-        avg1 = 0
-        # Se le pide el valor de la posicion counter en la lista de tracks del genero mas escuchado a la lista general
-        value = lt.getElement(catalog['reps'],lt.getElement(lstGenre, counter))
-        # Se le pide la primera parte de la tupla que es la que contiene la informacion util
-        value2 = (value[0])['track_id']
-        # Se le piden los hashtags asociados al track_id de la entrada
-        hashtags = mp.get(catalog['track'],value2)
-        hashtags = me.getValue(hashtags)
-        # Se crea una lista que va a contener los vander avg de cada uno de los hashtags
-        lst5 = lt.newList(datastructure = 'SINGLE_LINKED')
-        # Si la cantidad de hashtags es diferente de cero, para cada hashtag se pide la entrada en la lista de sentimientos
-        if lt.size(hashtags) != 0:
-            for element in lt.iterator(hashtags):
-                  feel = mp.get(catalog['feelings'], element)
-                  # Si existe una entrada asociada al hashtag en la lista de sentimientos, se pide el valor
-                  if feel != None:
-                      feel1 = me.getValue(feel)
-                      # Como puede existir mas de una entrada asociada a un hashtag en la lista de sentimientos (y por lo tanto varios valores vader_avg), se usa el primero
-                      feel1 = lt.getElement(feel1, 0)
-                      # Si el vader_avg no está vacio se saca el valor, se añade a la lista lst5 y se suma a avg 1
-                      if feel1['vader_avg'] != '':
-                           avg = float(feel1['vader_avg'])
-                           lt.addLast(lst5, avg)
-                           avg1 = avg1 + avg
-                 
-        #La lista de valores de avg para esta entrada (hashtags validos) se añade a la lista 2, solo se añade si es diferente a cero porque se necesita sacar el promedio (y no se puede dividir en cero)
-        if lt.isEmpty(lst5) == 0:
-           lt.addLast(lst2, lt.size(lst5))     
-        #El id de esta entrada se añade a la lst3
-        lt.addLast(lst3, value2)
-        #La suma de los average se añade a la lst4 
-        lt.addLast(lst4, avg1)
-        counter = counter + 1
+def getHashtags(catalog, lstGenre):
+    
+    lstOfElements = lt.newList(datastructure = 'SINGLE_LINKED')
+    localHash = mp.newMap(numelements=40000, prime=20011, maptype="CHAINING", loadfactor = 2.0)
+
+    for rep in lt.iterator(lstGenre):
+
+      existsEntry = mp.get(localHash, (rep[0])['track_id'])
+      if existsEntry == None:
+          dataentry = lt.newList("SINGLE_LINKED")
+          mp.put(localHash,(rep[0])['track_id'],dataentry)
+      else:
+          dataentry = me.getValue(existsEntry)
+      if lt.isPresent(dataentry,rep[1]) == 0 :
+          lt.addLast(dataentry, rep[1])
+
+
+    for element in lt.iterator(lstGenre):
+
+        catalogForElement = {'numHashtags': 0, 'avg': 0, 'id': None}
+        sumOfVader = 0
+        counterOfValidVaderValues = 0
+
+        track = (element[0])['track_id']
+        listOfHashtags = me.getValue(mp.get(localHash,track))
+        listOfHashtags = eliminateRepeated(listOfHashtags)
+        numHashtags = lt.size(listOfHashtags)
+        for hashtag in lt.iterator(listOfHashtags):
+            feelRep = mp.get(catalog['feelings'], hashtag)
+            if feelRep != None:
+                feelRep = me.getValue(feelRep)
+                if feelRep != None:
+                     if feelRep['vader_avg'] != '':
+                          vaderAvg = float(feelRep['vader_avg'])
+                          sumOfVader = sumOfVader + vaderAvg
+                          counterOfValidVaderValues = counterOfValidVaderValues + 1
+
         
-    return maxName,  maxReps, lst2, lst3, lst4
+        if counterOfValidVaderValues != 0:
+           catalogForElement['avg'] = (sumOfVader/ counterOfValidVaderValues)
+        else:
+           catalogForElement['avg'] = 'Ninguno de los hashtags tiene vader avg'
+        catalogForElement['id'] = track
+        catalogForElement['numHashtags'] = numHashtags
+
+        lt.addLast(lstOfElements, catalogForElement)
+
+    newList = merge.sort(lstOfElements, cmpVideosByHash)
+    
+    return newList
+
+
+def eliminateRepeated(lst):
+    auxLst = lt.newList(datastructure = 'SINGLE_LINKED')
+    for element in lt.iterator(lst):
+        if lt.isPresent(auxLst, element.lower()) == 0:
+            lt.addLast(auxLst, element.lower())
+
+    return auxLst
+
+
+
+
+                
+            
+
+
+
+
 
 # Funciones utilizadas para comparar elementos dentro de una lista
+
 
 def cmpCharacteristics(char1, char2):
     if (float(char1) == float(char2)):
@@ -488,10 +533,21 @@ def compareListsSize(list1, list2):
 # Funciones de ordenamiento
 
 
-def cmpPosition1(pos1,pos2):
+def cmpPosition1(posi1,posi2):
+    pos1 = posi1['numHashtags']
+    pos2 = posi2['numHashtags']
+
     if int(pos1) == int(pos2):
         return 0
     elif int(pos1) < int(pos2):
         return 1
     else:
         return -1
+
+def cmpVideosByHash(vide1, vide2):
+    video1 = vide1['numHashtags']
+    video2 = vide2['numHashtags'] 
+    if float(video1) < float(video2):
+        return False
+    else:
+        return True
