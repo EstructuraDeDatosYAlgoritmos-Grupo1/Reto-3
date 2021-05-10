@@ -330,6 +330,16 @@ def pickRandomTracks(catalog, lst):
 
 # Cuarto Requerimiento
 
+def getArtists(catalog, minChar, maxChar, char):
+    lst = om.values(catalog[char], minChar, maxChar)
+    lst1 = lt.newList(datastructure='SINGLE-LINKED')
+    for element in lt.iterator(lst):
+       for element1 in lt.iterator(element):
+           element2 = (lt.getElement(catalog['reps'], element1))[0]
+           if lt.isPresent(lst1,(element2['artist_id'])) == 0:
+               lt.addLast(lst1,(element2['artist_id']))
+
+    return lt.size(lst1), lst1
 
 
 # Quinto Requerimiento
@@ -371,8 +381,7 @@ def getGenreByTimeRange(catalog, initialTi, finalTi):
         # Se le pide el valor de la posicion counter en la lista de tracks del genero mas escuchado a la lista general
         value = lt.getElement(catalog['reps'],lt.getElement(lstGenre, counter))
         # Se le pide la primera parte de la tupla que es la que contiene la informacion util
-        value1 = value[0]
-        value2 = value1['track_id']
+        value2 = (value[0])['track_id']
         # Se le piden los hashtags asociados al track_id de la entrada
         hashtags = mp.get(catalog['track'],value2)
         hashtags = me.getValue(hashtags)
@@ -395,14 +404,13 @@ def getGenreByTimeRange(catalog, initialTi, finalTi):
                  
         #La lista de valores de avg para esta entrada (hashtags validos) se añade a la lista 2, solo se añade si es diferente a cero porque se necesita sacar el promedio (y no se puede dividir en cero)
         if lt.isEmpty(lst5) == 0:
-           lt.addLast(lst2, lst5)     
+           lt.addLast(lst2, lt.size(lst5))     
         #El id de esta entrada se añade a la lst3
         lt.addLast(lst3, value2)
         #La suma de los average se añade a la lst4 
         lt.addLast(lst4, avg1)
-
         counter = counter + 1
-                
+        
     return maxName,  maxReps, lst2, lst3, lst4
 
 # Funciones utilizadas para comparar elementos dentro de una lista
@@ -465,3 +473,12 @@ def compareListsSize(list1, list2):
     else:
         return -1
 # Funciones de ordenamiento
+
+
+def cmpPosition1(pos1,pos2):
+    if int(pos1) == int(pos2):
+        return 0
+    elif int(pos1) < int(pos2):
+        return 1
+    else:
+        return -1

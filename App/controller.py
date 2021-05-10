@@ -106,5 +106,9 @@ def getTimeByRange(catalog,initialTime,finalTime):
     result = model.getGenreByTimeRange(catalog, initialTi, finalTi)
     return result
 
+def getArtists(catalog, minChar, maxChar, char):
+    return model.getArtists(catalog, minChar, maxChar, char)
+
+
 
 

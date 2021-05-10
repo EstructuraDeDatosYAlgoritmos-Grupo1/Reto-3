@@ -110,8 +110,10 @@ while True:
                 print("Ingrese un numero entre 1 y -1.")
             else:
                 total = controller.getCharByRange(catalog, bestChar, minChar, maxChar)
+                artists = controller.getArtists(catalog,minChar, maxChar, bestChar)
                 print("\nTotal de eventos de escucha en el rango de "+bestChar+": " + str(total[0]))
                 print('Altura del arbol: ' + str(controller.indexHeight(catalog[bestChar])))
+                print("\nTotal de artistas en el rango de " + bestChar + ": " + str(artists[0]))
 
     elif int(inputs[0]) == 3:
         minEnergy = float(input("Ingrese el valor minimo de energia (Entre 1.0 y -1.0): "))
@@ -150,15 +152,29 @@ while True:
                 minTempo = tempoRange[0]
                 maxTempo = tempoRange[1]
                 total = controller.getCharByRange(catalog,"tempo",minTempo,maxTempo)
+                artists = controller.getArtists(catalog, minTempo, maxTempo, "tempo")
                 print("Para "+str(genre)+" el tempo esta entre "+str(minTempo)+" y "+str(maxTempo)+" BPM...")
                 print("\nEl numero de reproducciones para este genero fueron: "+str(total[0]))
+                print("\nEl numero de artistas para este genero fueron: "+str(artists[0]))
+                print("\n Los diez primeros artistas son")
+                counter = 0
+                while counter < 10:
+                    counter = counter + 1
+                    print('Artista '+ str(counter) + ' : ' + lt.getElement(artists[1],counter))
             elif genrePos == 10:
                 genre = input("Ingrese el nombre del nuevo genero: ")
                 minTempo = float(input("Ingrese el valor minimo del tempo: "))
                 maxTempo = float(input("Ingrese el valor maximo del tempo: "))
                 total = controller.getCharByRange(catalog,"tempo",minTempo,maxTempo)
+                artists = controller.getArtists(catalog, minTempo, maxTempo, "tempo")
                 print("Para "+str(genre)+" el tempo esta entre "+str(minTempo)+" y "+str(maxTempo)+" BPM...")
                 print("\nEl numero de reproducciones para este genero fueron: "+str(total[0]))
+                print("\nEl numero de artistas para este genero fueron: "+str(artists[0]))
+                print("\n Los diez primeros artistas son")
+                counter = 0
+                while counter < 10:
+                    counter = counter + 1
+                    print('Artista '+ str(counter) + ' : ' + lt.getElement(artists[1],counter))
     
     elif int(inputs[0]) == 6:
         initialTime = input("Ingrese la hora minima (H:M): ")
@@ -168,8 +184,9 @@ while True:
         print('\n Diez de sus tracks son: \n')
         counter = 0
         while counter < 10:
-            print('ID: ' + str(lt.getElement(total[3],counter)) + ' Hashtags : ' + str(lt.size(lt.getElement(total[2],counter))) + ' vader promedio de: ' +  str(lt.getElement(total[4],counter)/lt.size(lt.getElement(total[2],counter))))
+            print('ID: ' + str(lt.getElement(total[3],counter)) + ' Hashtags : ' + str(lt.getElement(total[2],counter)) + ' vader promedio de: ' +  str(lt.getElement(total[4],counter)/lt.getElement(total[2],counter)))
             counter = counter + 1
+       
     
 
     else:
