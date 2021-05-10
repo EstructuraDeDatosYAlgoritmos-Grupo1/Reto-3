@@ -110,7 +110,7 @@ def getArtists(catalog, minChar, maxChar, char):
     return model.getArtists(catalog, minChar, maxChar, char)
 
 def getArtistsInList(catalog, posList):
-    return model.getArtistsInList(catalgo, posLIst)
+    return model.getArtistsInList(catalog, posList)
 
 
 
