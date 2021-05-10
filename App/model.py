@@ -390,7 +390,7 @@ def getMostlistenedGenre(catalog, lst):
             for genre in lt.iterator(genreList):
                 if (float(tempo) >= float(genre['mini']) and float(tempo) <= float(genre['maxi'])):
                         genre['reps'] =  genre['reps'] + 1
-                        lt.addLast(genre['avg'],lstrep3['track_id'])
+                        lt.addLast(genre['avg'],lstrep2)
             
     for genre in lt.iterator(genreList):
         if genre['reps'] > maxReps:
@@ -403,15 +403,28 @@ def getMostlistenedGenre(catalog, lst):
 def getHashtags(catalog, lstGenre):
     
     lstOfElements = lt.newList(datastructure = 'SINGLE_LINKED')
+    localHash = mp.newMap(numelements=40000, prime=20011, maptype="CHAINING", loadfactor = 2.0)
 
-    for track in lt.iterator(lstGenre):
+    for rep in lt.iterator(lstGenre):
+
+      existsEntry = mp.get(localHash, (rep[0])['track_id'])
+      if existsEntry == None:
+          dataentry = lt.newList("SINGLE_LINKED")
+          mp.put(localHash,(rep[0])['track_id'],dataentry)
+      else:
+          dataentry = me.getValue(existsEntry)
+      if lt.isPresent(dataentry,rep[1]) == 0 :
+          lt.addLast(dataentry, rep[1])
+
+
+    for element in lt.iterator(lstGenre):
 
         catalogForElement = {'numHashtags': 0, 'avg': 0, 'id': None}
         sumOfVader = 0
         counterOfValidVaderValues = 0
 
-        
-        listOfHashtags = me.getValue(mp.get(catalog['track'],track))
+        track = (element[0])['track_id']
+        listOfHashtags = me.getValue(mp.get(localHash,track))
         listOfHashtags = eliminateRepeated(listOfHashtags)
         numHashtags = lt.size(listOfHashtags)
         for hashtag in lt.iterator(listOfHashtags):
@@ -442,8 +455,8 @@ def getHashtags(catalog, lstGenre):
 def eliminateRepeated(lst):
     auxLst = lt.newList(datastructure = 'SINGLE_LINKED')
     for element in lt.iterator(lst):
-        if lt.isPresent(auxLst, element) == 0:
-            lt.addLast(auxLst, element)
+        if lt.isPresent(auxLst, element.lower()) == 0:
+            lt.addLast(auxLst, element.lower())
 
     return auxLst
 

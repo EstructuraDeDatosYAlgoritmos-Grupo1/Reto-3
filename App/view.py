@@ -191,6 +191,7 @@ while True:
             element = lt.getElement(total[2],counter)
             print('ID: ' + str(element['id']) + ' Hashtags : ' + str(element['numHashtags']) + ' vader promedio de: ' +  str(element['avg']) )
             counter = counter + 1
+      
        
     
 
