@@ -19,7 +19,9 @@
  * You should have received a copy of the GNU General Public License
  * along withthis program.  If not, see <http://www.gnu.org/licenses/>.
  """
-
+import time
+import tracemalloc
+import csv
 import config as cf
 import sys
 import controller
@@ -80,6 +82,38 @@ def printRandomTracks(catalog, lst):
         track = track1[0]
         print("Track"+str(trackNumber)+": "+str(track["track_id"])+" con instrumentalidad de "+str(track["instrumentalness"])+" y tempo de "+str(track["tempo"]))
 
+#Funciones para la toma del tiempo y memoria
+
+def getTime():
+    """
+    devuelve el instante tiempo de procesamiento en milisegundos
+    """
+    return float(time.perf_counter()*1000)
+
+
+def getMemory():
+    """
+    toma una muestra de la memoria alocada en instante de tiempo
+    """
+    return tracemalloc.take_snapshot()
+
+
+def deltaMemory(start_memory, stop_memory):
+    """
+    calcula la diferencia en memoria alocada del programa entre dos
+    instantes de tiempo y devuelve el resultado en bytes (ej.: 2100.0 B)
+    """
+    memory_diff = stop_memory.compare_to(start_memory, "filename")
+    delta_memory = 0.0
+
+    # suma de las diferencias en uso de memoria
+    for stat in memory_diff:
+        delta_memory = delta_memory + stat.size_diff
+    # de Byte -> kByte
+    delta_memory = delta_memory/1024.0
+    return delta_memory
+
+
 catalog = {}
 charList = controller.newCharList()
 genreList = controller.newGenreList()
@@ -109,17 +143,37 @@ while True:
             if minChar > 1.00 or minChar < -1.00 or maxChar > 1.00 or maxChar < -1.00:
                 print("Ingrese un numero entre 1 y -1.")
             else:
+                delta_time = -1.0
+                delta_memory = -1.0
+                tracemalloc.start()
+                start_time = getTime()
+                start_memory = getMemory()
+
                 total = controller.getCharByRange(catalog, bestChar, minChar, maxChar)
                 artists = controller.getArtists(catalog,minChar, maxChar, bestChar)
                 print("\nTotal de eventos de escucha en el rango de "+bestChar+": " + str(total[0]))
                 print('Altura del arbol: ' + str(controller.indexHeight(catalog[bestChar])))
                 print("\nTotal de artistas en el rango de " + bestChar + ": " + str(artists[0]))
 
+                stop_memory = getMemory()
+                stop_time = getTime()
+                tracemalloc.stop()
+                delta_time = stop_time - start_time
+                delta_memory = deltaMemory(start_memory, stop_memory)
+                print(delta_time,delta_memory)
+
     elif int(inputs[0]) == 3:
         minEnergy = float(input("Ingrese el valor minimo de energia (Entre 1.0 y -1.0): "))
         maxEnergy = float(input("Ingrese el valor maximo de energia (Entre 1.0 y -1.0): "))
         minDanceability = float(input("Ingrese el valor minimo de bailabilidad (Entre 1.0 y -1.0): "))
         maxDanceability = float(input("Ingrese el valor maximo de bailabilidad (Entre 1.0 y -1.0): "))
+
+        delta_time = -1.0
+        delta_memory = -1.0
+        tracemalloc.start()
+        start_time = getTime()
+        start_memory = getMemory()
+
         enregyList = controller.getCharByRange(catalog, "energy", minEnergy, maxEnergy)
         danceabilityList = controller.getCharByRange(catalog, "danceability", minDanceability, maxDanceability)
         answers = controller.joinLists(enregyList[1], danceabilityList[1])
@@ -128,11 +182,25 @@ while True:
         artists = controller.getArtistsInList(catalog, answers[1])
         print("El numero de artistas unicos fue: "+ str(artists[0]))
 
+        stop_memory = getMemory()
+        stop_time = getTime()
+        tracemalloc.stop()
+        delta_time = stop_time - start_time
+        delta_memory = deltaMemory(start_memory, stop_memory)
+        print(delta_time,delta_memory)
+
     elif int(inputs[0]) == 4:
         minInstrumentalness = float(input("Ingrese el valor minimo de instrumentalidad (Entre 1.0 y -1.0): "))
         maxInstrumentalness = float(input("Ingrese el valor maximo de instrumentalidad (Entre 1.0 y -1.0): "))
         minTempo = float(input("Ingrese el valor minimo para el tempo: "))
         maxTempo = float(input("Ingrese el valor maximo para el tempo: "))
+
+        delta_time = -1.0
+        delta_memory = -1.0
+        tracemalloc.start()
+        start_time = getTime()
+        start_memory = getMemory()
+
         instrumentalList = controller.getCharByRange(catalog, "instrumentalness", minInstrumentalness, maxInstrumentalness)
         tempoList = controller.getCharByRange(catalog, "tempo", minTempo, maxTempo)
         answers = controller.joinLists(instrumentalList[1], tempoList[1])
@@ -140,6 +208,15 @@ while True:
         printRandomTracks(catalog, answers[1])
         artists = controller.getArtistsInList(catalog, answers[1])
         print("El numero de artistas unicos fue: "+ str(artists[0]))
+
+        stop_memory = getMemory()
+        stop_time = getTime()
+        tracemalloc.stop()
+        delta_time = stop_time - start_time
+        delta_memory = deltaMemory(start_memory, stop_memory)
+        print(delta_time,delta_memory)
+
+
 
     elif int(inputs[0]) ==5:
         printGenres()
@@ -151,6 +228,13 @@ while True:
             if genrePos <= 0 or genrePos > 10:
                 print("Ingrese una numero valido")
             elif genrePos !=10:
+
+                delta_time = -1.0
+                delta_memory = -1.0
+                tracemalloc.start()
+                start_time = getTime()
+                start_memory = getMemory()
+
                 tempoRange = controller.getGenre(genreList,genrePos)
                 genre = tempoRange[2]
                 minTempo = tempoRange[0]
@@ -165,10 +249,24 @@ while True:
                 while counter < 10:
                     counter = counter + 1
                     print('Artista '+ str(counter) + ' : ' + lt.getElement(artists[1],counter))
+                stop_memory = getMemory()
+                stop_time = getTime()
+                tracemalloc.stop()
+                delta_time = stop_time - start_time
+                delta_memory = deltaMemory(start_memory, stop_memory)
+                print(delta_time,delta_memory)
+
             elif genrePos == 10:
                 genre = input("Ingrese el nombre del nuevo genero: ")
                 minTempo = float(input("Ingrese el valor minimo del tempo: "))
                 maxTempo = float(input("Ingrese el valor maximo del tempo: "))
+
+                delta_time = -1.0
+                delta_memory = -1.0
+                tracemalloc.start()
+                start_time = getTime()
+                start_memory = getMemory()
+
                 total = controller.getCharByRange(catalog,"tempo",minTempo,maxTempo)
                 artists = controller.getArtists(catalog, minTempo, maxTempo, "tempo")
                 print("Para "+str(genre)+" el tempo esta entre "+str(minTempo)+" y "+str(maxTempo)+" BPM...")
@@ -179,10 +277,26 @@ while True:
                 while counter < 10:
                     counter = counter + 1
                     print('Artista '+ str(counter) + ' : ' + lt.getElement(artists[1],counter))
+                
+                stop_memory = getMemory()
+                stop_time = getTime()
+                tracemalloc.stop()
+                delta_time = stop_time - start_time
+                delta_memory = deltaMemory(start_memory, stop_memory)
+                print(delta_time,delta_memory)
+
+
     
     elif int(inputs[0]) == 6:
         initialTime = input("Ingrese la hora minima (H:M): ")
         finalTime = input("Ingrese la hora maxima (H:M): ")
+        
+        delta_time = -1.0
+        delta_memory = -1.0
+        tracemalloc.start()
+        start_time = getTime()
+        start_memory = getMemory()
+
         total = controller.getTimeByRange(catalog,initialTime,finalTime)
         print('El genero mas escuchado entre las ' + str(initialTime) + ' y las ' + str(finalTime) + ' es ' + str(total[0]) + ' con ' + str(total[1])+ ' reproducciones')
         print('\n Diez de sus tracks son: \n')
@@ -191,6 +305,12 @@ while True:
             element = lt.getElement(total[2],counter)
             print('ID: ' + str(element['id']) + ' Hashtags : ' + str(element['numHashtags']) + ' vader promedio de: ' +  str(element['avg']) )
             counter = counter + 1
+        stop_memory = getMemory()
+        stop_time = getTime()
+        tracemalloc.stop()
+        delta_time = stop_time - start_time
+        delta_memory = deltaMemory(start_memory, stop_memory)
+        print(delta_time,delta_memory)
       
        
     
