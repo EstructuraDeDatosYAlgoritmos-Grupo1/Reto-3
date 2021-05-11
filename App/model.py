@@ -311,16 +311,8 @@ def combineLists(lst):
             lt.addLast(finalLst, cmpPos)
     return finalLst
 
-def joinLists(lst1, lst2):
-    finalLst = lt.newList(datastructure="ARRAY_LIST", cmpfunction=cmpPosition)
-    for pos1 in lt.iterator(lst1):
-        pos1 = int(pos1)
-        if lt.isPresent(lst2, pos1) != 0:
-            lt.addLast(finalLst, pos1)
-    totreps = lt.size(finalLst)
-    return totreps, finalLst
 
-def joinLists2(lst1, lst2):
+def joinLists(lst1, lst2):
     finalLst = lt.newList(datastructure="ARRAY_LIST", cmpfunction=cmpPosition)
     tempMap = om.newMap(omaptype="BST")
     for pos1 in lt.iterator(lst1):

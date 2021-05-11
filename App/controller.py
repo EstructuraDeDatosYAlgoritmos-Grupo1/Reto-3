@@ -73,9 +73,6 @@ def joinLists(lst1, lst2):
     answers = model.joinLists(lst1, lst2)
     return answers
 
-def joinLists2(lst1, lst2):
-    answers = model.joinLists2(lst1,lst2)
-    return answers
 
 # Funciones de consulta sobre el catálogo
 def getChar(charList, charPos):
