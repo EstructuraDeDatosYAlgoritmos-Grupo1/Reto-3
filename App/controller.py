@@ -95,7 +95,10 @@ def getCharByRange(catalog, bestChar, minchar, maxchar):
     return answers
 
 def pickRandomTracks(catalog, lst):
-    randomTracks = model.pickRandomTracks(catalog, lst)
+    if lst.size() == 0:
+        return -1
+    else:
+        randomTracks = model.pickRandomTracks(catalog, lst)
     return randomTracks
 
 def getTimeByRange(catalog,initialTime,finalTime):

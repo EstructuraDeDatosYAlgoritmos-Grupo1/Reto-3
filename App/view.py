@@ -77,10 +77,13 @@ def printGenres():
 
 def printRandomTracks(catalog, lst):
     randomTracks = controller.pickRandomTracks(catalog, lst)
-    trackNumber = 1
-    for track1 in lt.iterator(randomTracks):
-        track = track1[0]
-        print("Track"+str(trackNumber)+": "+str(track["track_id"])+" con instrumentalidad de "+str(track["instrumentalness"])+" y tempo de "+str(track["tempo"]))
+    if randomTracks == -1:
+        print("No se encontraron repeticiones para los valores ingresados")
+    else:
+        trackNumber = 1
+        for track1 in lt.iterator(randomTracks):
+            track = track1[0]
+            print("Track"+str(trackNumber)+": "+str(track["track_id"])+" con instrumentalidad de "+str(track["instrumentalness"])+" y tempo de "+str(track["tempo"]))
 
 #Funciones para la toma del tiempo y memoria
 
@@ -179,13 +182,14 @@ while True:
         answers = controller.joinLists(enregyList[1], danceabilityList[1])
         print("Hay un total de " + str(answers[0]) + " repeticiones entre el rango de bailabilidad " + str(minDanceability) + " - " + str(maxDanceability) + " y para el rango de energia "+str(minEnergy)+" - "+str(maxEnergy))
         printRandomTracks(catalog, answers[1])
-
+        
         stop_memory = getMemory()
         stop_time = getTime()
         tracemalloc.stop()
         delta_time = stop_time - start_time
         delta_memory = deltaMemory(start_memory, stop_memory)
         print(delta_time,delta_memory)
+
 
     elif int(inputs[0]) == 4:
         minInstrumentalness = float(input("Ingrese el valor minimo de instrumentalidad (Entre 1.0 y -1.0): "))
@@ -202,6 +206,7 @@ while True:
         instrumentalList = controller.getCharByRange(catalog, "instrumentalness", minInstrumentalness, maxInstrumentalness)
         tempoList = controller.getCharByRange(catalog, "tempo", minTempo, maxTempo)
         answers = controller.joinLists(instrumentalList[1], tempoList[1])
+        
         print("Hay un total de " + str(answers[0]) + " repeticiones entre el rango de instrumentalidad " + str(minInstrumentalness) + " - " + str(maxInstrumentalness) + " y para el rango de tempo "+str(minTempo)+" - "+str(maxTempo))
         printRandomTracks(catalog, answers[1])
 
