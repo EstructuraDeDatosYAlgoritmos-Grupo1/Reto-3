@@ -85,6 +85,17 @@ def printRandomTracks(catalog, lst):
             track = track1[0]
             print("Track"+str(trackNumber)+": "+str(track["track_id"])+" con instrumentalidad de "+str(track["instrumentalness"])+" y tempo de "+str(track["tempo"]))
 
+def printRandomTracks2(catalog, lst):
+    randomTracks = controller.pickRandomTracks(catalog, lst)
+    if randomTracks == -1:
+        print("No se encontraron repeticiones para los valores ingresados")
+    else:
+        trackNumber = 1
+        for track1 in lt.iterator(randomTracks):
+            track = track1[0]
+            print("Track"+str(trackNumber)+": "+str(track["track_id"])+" con energia de "+str(track["energy"])+" y bailabilidad de "+str(track["danceability"]))
+
+
 #Funciones para la toma del tiempo y memoria
 
 def getTime():
@@ -180,10 +191,10 @@ while True:
         enregyList = controller.getCharByRange(catalog, "energy", minEnergy, maxEnergy)
         danceabilityList = controller.getCharByRange(catalog, "danceability", minDanceability, maxDanceability)
         
-        print(danceabilityList)
-        '''
+        answers = controller.joinLists2(enregyList[1], danceabilityList[1])
+        print(answers)
         print("Hay un total de " + str(answers[0]) + " repeticiones entre el rango de bailabilidad " + str(minDanceability) + " - " + str(maxDanceability) + " y para el rango de energia "+str(minEnergy)+" - "+str(maxEnergy))
-        printRandomTracks(catalog, answers[1])'''
+        printRandomTracks2(catalog, answers[1])
         
         stop_memory = getMemory()
         stop_time = getTime()

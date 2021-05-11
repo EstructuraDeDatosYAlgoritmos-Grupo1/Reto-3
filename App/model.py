@@ -320,6 +320,17 @@ def joinLists(lst1, lst2):
     totreps = lt.size(finalLst)
     return totreps, finalLst
 
+def joinLists2(lst1, lst2):
+    finalLst = lt.newList(datastructure="ARRAY_LIST", cmpfunction=cmpPosition)
+    tempMap = om.newMap(omaptype="BST")
+    for pos1 in lt.iterator(lst1):
+        om.put(tempMap, pos1, True)
+    for pos2 in lt.iterator(lst2):
+        if om.get(tempMap,pos2) != None:
+            lt.addLast(finalLst, pos2)
+    totreps = lt.size(finalLst)
+    return totreps, finalLst
+
 # Segundo Requerimiento
 
 
