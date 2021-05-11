@@ -23,6 +23,7 @@
 import config as cf
 import model
 import csv
+from DISClib.ADT import list as lt
 import datetime
 
 
@@ -95,7 +96,7 @@ def getCharByRange(catalog, bestChar, minchar, maxchar):
     return answers
 
 def pickRandomTracks(catalog, lst):
-    if lst.size() == 0:
+    if lt.size(lst) == 0:
         return -1
     else:
         randomTracks = model.pickRandomTracks(catalog, lst)

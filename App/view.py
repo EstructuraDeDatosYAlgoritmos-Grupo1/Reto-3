@@ -179,9 +179,11 @@ while True:
 
         enregyList = controller.getCharByRange(catalog, "energy", minEnergy, maxEnergy)
         danceabilityList = controller.getCharByRange(catalog, "danceability", minDanceability, maxDanceability)
-        answers = controller.joinLists(enregyList[1], danceabilityList[1])
+        
+        print(danceabilityList)
+        '''
         print("Hay un total de " + str(answers[0]) + " repeticiones entre el rango de bailabilidad " + str(minDanceability) + " - " + str(maxDanceability) + " y para el rango de energia "+str(minEnergy)+" - "+str(maxEnergy))
-        printRandomTracks(catalog, answers[1])
+        printRandomTracks(catalog, answers[1])'''
         
         stop_memory = getMemory()
         stop_time = getTime()
